@@ -19,6 +19,7 @@ db.init_app(app)
 def home():
   return '<h1>Welcome to restaurants</h1>'
 
+#getting all the restaurants
 @app.route('/restaurants',methods=['GET'])
 def restaurants():
   restaurants=Restaurant.query.all()
@@ -31,8 +32,41 @@ def restaurants():
             "address": restaurant.address
     }
     restaurants_data.append(restaurant_details)
-    response=make_response(jsonify(restaurants_data),200)
+
+  response=make_response(jsonify(restaurants_data),200)
   return response
 
+#getting a single restaurant
+@app.route('/restaurants/<int:id>',methods=['GET'])
+def one_restaurant(id):
+  restaurant=Restaurant.query.filter_by(id=id).first()
+
+  if restaurant == None:
+        response_body={
+              "error": "Restaurant not found"
+        }
+        response = make_response(jsonify(response_body),404)
+        return response
+  else:
+      #getting the pizzas for that restaurant
+     pizzas=RestaurantPizza.query.filter_by(restaurant_id=id).all()
+     pizza_details=[]
+
+     for pizza in pizzas:
+        pizza_info={
+            "id": pizza.pizza.id,
+            "name": pizza.pizza.name,
+            "ingredients": pizza.pizza.ingredients
+        }
+        pizza_details.append(pizza_info)
+
+     restaurant_details={
+       "id": restaurant.id,
+        "name": restaurant.name,
+        "address": restaurant.address,
+        "pizzas": pizza_details
+    }
+  response =make_response(jsonify(restaurant_details),200)
+  return response
 if __name__=='__main__':
   app.run(port=5555,debug=True)
