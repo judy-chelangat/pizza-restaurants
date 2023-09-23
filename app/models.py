@@ -30,7 +30,7 @@ class RestaurantPizza(db.Model):
     pizza=db.relationship('Pizza',backref='restaurantpizza')
 
     def __repr__(self):
-        return f'<RestaurantPizza {self.name}, ${self.price}>'
+        return f'<RestaurantPizza {self.price}>'
     
 class Pizza(db.Model):
     __tablename__='pizzas'
