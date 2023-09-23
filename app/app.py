@@ -48,25 +48,67 @@ def one_restaurant(id):
         response = make_response(jsonify(response_body),404)
         return response
   else:
-      #getting the pizzas for that restaurant
-     pizzas=RestaurantPizza.query.filter_by(restaurant_id=id).all()
-     pizza_details=[]
+            if request.method == 'GET':
+                 #getting the pizzas for that restaurant
+                pizzas=RestaurantPizza.query.filter_by(restaurant_id=id).all()
+                pizza_details=[]
 
-     for pizza in pizzas:
-        pizza_info={
-            "id": pizza.pizza.id,
-            "name": pizza.pizza.name,
-            "ingredients": pizza.pizza.ingredients
+                for pizza in pizzas:
+                    pizza_info={
+                        "id": pizza.pizza.id,
+                        "name": pizza.pizza.name,
+                        "ingredients": pizza.pizza.ingredients
+                    }
+                    pizza_details.append(pizza_info)
+
+                restaurant_details={
+                "id": restaurant.id,
+                    "name": restaurant.name,
+                    "address": restaurant.address,
+                    "pizzas": pizza_details
+                }
+                response =make_response(jsonify(restaurant_details),200)
+                return response
+          
+  #deleting a restaurant
+@app.route('/restaurants/<int:id>',methods=['DELETE'])
+def delete_restaurant(id):
+    restaurant=Restaurant.query.filter_by(id=id).first()
+    #if no restaurant is found
+
+    if restaurant is None:
+        response_body={
+             "error": "Restaurant not found" 
         }
-        pizza_details.append(pizza_info)
+        response = make_response(jsonify(response_body), 404)
+        return response
+    #deleting the associated restaurant pizza first
+    RestaurantPizza.query.filter_by(restaurant_id=id).delete()
 
-     restaurant_details={
-       "id": restaurant.id,
-        "name": restaurant.name,
-        "address": restaurant.address,
-        "pizzas": pizza_details
+    #deleting the restaurant
+    db.session.delete(restaurant)
+    db.session.commit()
+
+    return '',204
+#getting all the pizzas
+@app.route('/pizzas',methods=['GET'])
+def pizzas():
+  pizzas=Pizza.query.all()
+  pizza_data=[] #list to store the data
+
+  for pizza in pizzas:
+    pizza_details={
+            "id": pizza.id,
+            "name": pizza.name,
+            "ingredients": pizza.ingredients,
     }
-  response =make_response(jsonify(restaurant_details),200)
+    pizza_data.append(pizza_details)
+
+  response=make_response(jsonify(pizza_data),200)
   return response
+
+#posting a restaurant pizza 
+
+
 if __name__=='__main__':
   app.run(port=5555,debug=True)
