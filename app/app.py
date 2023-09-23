@@ -113,7 +113,7 @@ def create_restuarantpizza():
     #extrating data from the form
     price=int(request.form.get('price'))
     pizza_id=int(request.form.get('pizza_id'))
-    restaurant_id=int(request.form.get('restaurant.id'))
+    restaurant_id=int(request.form.get('restaurant_id'))
    
    #validating the price
     if price <1 or price >30:
