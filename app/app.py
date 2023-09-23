@@ -108,7 +108,47 @@ def pizzas():
   return response
 
 #posting a restaurant pizza 
+@app.route('/restaurant_pizzas/',methods=['POST'])
+def create_restuarantpizza():
+    #extrating data from the form
+    price=int(request.form.get('price'))
+    pizza_id=int(request.form.get('pizza_id'))
+    restaurant_id=int(request.form.get('restaurant.id'))
+   
+   #validating the price
+    if price <1 or price >30:
+        response_body = {
+            "errors": ["Price must be between 1 and 30"]
+        }
+        response = make_response(jsonify(response_body), 400)
+        return response
+    #checking if the pizza and restaurant exist
+    pizza=Pizza.query.get(pizza_id)
+    restaurant=Restaurant.query.get(restaurant_id)
 
-
+    if not (pizza and restaurant):
+            response_body = {
+                "errors": ["Pizza or Restaurant not found"]
+            }
+            response = make_response(jsonify(response_body), 404)
+            return response
+     
+     #creating the new restaurant
+    new_restaurantpizza=RestaurantPizza(
+        price=price,
+        pizza_id=pizza_id,
+        restaurant_id=restaurant_id
+    )
+    db.session.add(new_restaurantpizza)
+    db.session.commit()
+    
+    #response data
+    response={
+            "id": pizza.id,
+            "name": pizza.name,
+            "ingredients": pizza.ingredients
+    }
+    response_data=make_response(jsonify(response),201)
+    return response_data
 if __name__=='__main__':
   app.run(port=5555,debug=True)
